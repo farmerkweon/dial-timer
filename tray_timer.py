@@ -34,7 +34,7 @@ import webbrowser
 # ---------------------------------------------------------------------------
 
 APP_NAME = "Dial Timer"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 APP_URL = "https://foxnail.kr"
 APP_COPYRIGHT = "© 2026 foxnail.kr · All rights reserved"
 

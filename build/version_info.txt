@@ -1,0 +1,29 @@
+# 자동 생성 파일 — build/make_version.py 가 만든다. 직접 고치지 말 것.
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 0, 2, 0),
+    prodvers=(1, 0, 2, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        '041204B0',
+        [StringStruct('CompanyName', 'foxnail.kr'),
+         StringStruct('FileDescription', 'Dial Timer — 0~99분 다이얼 타이머 / dial timer'),
+         StringStruct('FileVersion', '1.0.2.0'),
+         StringStruct('InternalName', 'DialTimer'),
+         StringStruct('LegalCopyright',
+                      'Copyright (c) 2026 foxnail.kr. MIT License.'),
+         StringStruct('OriginalFilename', 'DialTimer.exe'),
+         StringStruct('ProductName', 'Dial Timer'),
+         StringStruct('ProductVersion', '1.0.2.0')])
+    ]),
+    VarFileInfo([VarStruct('Translation', [0x0412, 1200])])
+  ]
+)

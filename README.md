@@ -174,6 +174,30 @@ pyinstaller --noconfirm --clean --windowed --name DialTimer ^
 ISCC installer/DialTimer.iss
 ```
 
+## 만든 사람 응원하기 / Support the developer
+
+이 시계가 도움이 되셨다면, 개발자를 위해 아래 앱을 핸드폰에 설치하고 즐겨주세요.
+<br>*If this timer helped you, please install these apps on your phone and enjoy them.*
+
+<div align="center">
+
+[![Lotto Sudoku](https://img.shields.io/badge/Google_Play-Lotto_Sudoku-2b6a4b?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.foxnail.lotto_sudoku)
+&nbsp;
+[![Art Grid](https://img.shields.io/badge/Google_Play-Art_Grid-2b6a4b?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=com.artgrid.app.free)
+
+**[로또 스도쿠](https://play.google.com/store/apps/details?id=com.foxnail.lotto_sudoku)** · **[아트 그리드](https://play.google.com/store/apps/details?id=com.artgrid.app.free)**
+
+</div>
+
+여력이 되면 아이폰 사용자를 위해서도 만들어 보겠습니다.
+<br>*If I get the chance, I'd like to build iPhone versions too.*
+
+이 앱들이 마음에 드신다면, 앱의 공유 버튼을 이용해 주위 지인들에게도 전해주세요.
+<br>*If you like them, please pass them on to people around you with the share button inside the app.*
+
+> 같은 내용이 프로그램 도움말(**HELP**) 맨 아래에도 들어 있습니다.
+> <br>*The same section is at the bottom of the in-app help.*
+
 ## 라이선스 / License
 
 [MIT](LICENSE) © 2026 [foxnail.kr](https://foxnail.kr)

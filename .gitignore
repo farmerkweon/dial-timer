@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# 빌드 산출물
+build/dist/
+build/work/
+build/*.spec
+build/icon_preview.png
+installer/Output/
+
+# 실행 중 생성되는 설정 (사용자별 값이라 커밋하지 않는다)
+timer_config.json
+
+# 참고용 실물 제품 사진 — 출처/저작권이 불분명해 공개 저장소에 올리지 않는다
+타이머.png
+
+# 이 PC 전용 실행기 (파이썬 경로가 하드코딩되어 있음)
+타이머 실행.vbs
+
+# 에이전트 도구 세션 상태
+.omc/
+
+# OS
+Thumbs.db
+desktop.ini

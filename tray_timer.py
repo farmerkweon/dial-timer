@@ -34,9 +34,13 @@ import webbrowser
 # ---------------------------------------------------------------------------
 
 APP_NAME = "Dial Timer"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 APP_URL = "https://foxnail.kr"
 APP_COPYRIGHT = "© 2026 foxnail.kr · All rights reserved"
+
+# 도움말 하단 응원 섹션에서 여는 링크
+URL_LOTTO_SUDOKU = "https://play.google.com/store/apps/details?id=com.foxnail.lotto_sudoku"
+URL_ART_GRID = "https://play.google.com/store/apps/details?id=com.artgrid.app.free"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -514,6 +518,17 @@ class HelpWindow(tk.Toplevel):
                     ("우클릭", "메뉴 (시작 · 리셋 · 투명도 · 종료)"),
                 ]),
             ],
+            "support": {
+                "title": "만든 사람 응원하기",
+                "intro": "이 시계가 도움이 되셨다면, 개발자를 위해 아래 앱을 "
+                         "핸드폰에 설치하고 즐겨주세요.",
+                "apps": [("로또 스도쿠", URL_LOTTO_SUDOKU),
+                         ("아트 그리드", URL_ART_GRID)],
+                "store": "Google Play",
+                "note": "여력이 되면 아이폰 사용자를 위해서도 만들어 보겠습니다.",
+                "share": "이 앱들이 마음에 드신다면, 앱의 공유 버튼을 이용해 "
+                         "주위 지인들에게도 전해주세요.",
+            },
         },
         "en": {
             "window": "Help",
@@ -548,6 +563,18 @@ class HelpWindow(tk.Toplevel):
                     ("Right click", "Menu (start · reset · opacity · quit)"),
                 ]),
             ],
+            "support": {
+                "title": "Support the developer",
+                "intro": "If this timer helped you, please install these apps "
+                         "on your phone and enjoy them.",
+                "apps": [("Lotto Sudoku", URL_LOTTO_SUDOKU),
+                         ("Art Grid", URL_ART_GRID)],
+                "store": "Google Play",
+                "note": "If I get the chance, I'd like to build iPhone "
+                        "versions too.",
+                "share": "If you like them, please pass them on to people "
+                         "around you with the share button inside the app.",
+            },
         },
     }
 
@@ -560,6 +587,9 @@ class HelpWindow(tk.Toplevel):
     FG_LINK = "#6fa8ff"
     FG_LINK_HOVER = "#a8ccff"
     LINE = "#383838"
+    SUPPORT_BG = "#1f2320"
+    STORE_BG = "#2b6a4b"
+    STORE_BG_HOVER = "#357f5a"
 
     def __init__(self, app: "TrayTimerUI"):
         super().__init__(app.root)
@@ -633,7 +663,67 @@ class HelpWindow(tk.Toplevel):
                 padx=(0, int(p(12))) if i % 2 == 0 else (0, 0),
                 pady=(0, int(p(10))))
 
+        self._support(root)
         self._footer(root)
+
+    def _support(self, parent) -> None:
+        """도움말 맨 아래 응원 배너 (좌우 단 전체 폭)."""
+        p, t = self._px, self._t["support"]
+        card = tk.Frame(parent, bg=self.SUPPORT_BG,
+                        padx=int(p(14)), pady=int(p(11)))
+        card.pack(fill="x")
+
+        head = tk.Frame(card, bg=self.SUPPORT_BG)
+        head.pack(fill="x")
+        tk.Label(head, text="♥", bg=self.SUPPORT_BG, fg=self.FG_KEY,
+                 font=self._font(12, True)).pack(side="left",
+                                                 padx=(0, int(p(6))))
+        tk.Label(head, text=t["title"], bg=self.SUPPORT_BG,
+                 fg=self.FG_TITLE, font=self._font(11, True)).pack(side="left")
+
+        tk.Label(card, text=t["intro"], bg=self.SUPPORT_BG, fg=self.FG_VAL,
+                 font=self._font(10), anchor="w",
+                 justify="left").pack(fill="x", pady=(int(p(6)), int(p(8))))
+
+        apps = tk.Frame(card, bg=self.SUPPORT_BG)
+        apps.pack(fill="x")
+        for name, url in t["apps"]:
+            self._store_button(apps, name, t["store"], url)
+
+        tk.Label(card, text=t["note"], bg=self.SUPPORT_BG, fg=self.FG_DIM,
+                 font=self._font(10), anchor="w",
+                 justify="left").pack(fill="x", pady=(int(p(9)), 0))
+        tk.Label(card, text=t["share"], bg=self.SUPPORT_BG, fg=self.FG_DIM,
+                 font=self._font(10), anchor="w",
+                 justify="left").pack(fill="x", pady=(int(p(2)), 0))
+
+    def _store_button(self, parent, name: str, store: str, url: str) -> None:
+        p = self._px
+        btn = tk.Frame(parent, bg=self.STORE_BG, cursor="hand2",
+                       padx=int(p(14)), pady=int(p(7)))
+        btn.pack(side="left", padx=(0, int(p(10))))
+        top = tk.Label(btn, text=name, bg=self.STORE_BG, fg="#ffffff",
+                       font=self._font(11, True), cursor="hand2")
+        top.pack(anchor="w")
+        sub = tk.Label(btn, text=f"▶  {store}", bg=self.STORE_BG,
+                       fg="#9fd0b0", font=self._font(9), cursor="hand2")
+        sub.pack(anchor="w")
+
+        def open_it(_e=None):
+            self._open_url(url)
+
+        def enter(_e=None):
+            for w in (btn, top, sub):
+                w.configure(bg=self.STORE_BG_HOVER)
+
+        def leave(_e=None):
+            for w in (btn, top, sub):
+                w.configure(bg=self.STORE_BG)
+
+        for w in (btn, top, sub):
+            w.bind("<Button-1>", open_it)
+            w.bind("<Enter>", enter)
+            w.bind("<Leave>", leave)
 
     def _footer(self, parent) -> None:
         p = self._px
@@ -660,8 +750,12 @@ class HelpWindow(tk.Toplevel):
                  anchor="w").pack(fill="x", pady=(int(p(8)), 0))
 
     def _open_site(self, _event=None) -> None:
+        self._open_url(APP_URL)
+
+    @staticmethod
+    def _open_url(url: str) -> None:
         try:
-            webbrowser.open_new_tab(APP_URL)
+            webbrowser.open_new_tab(url)
         except Exception:                     # 브라우저가 없어도 창은 살아있게
             pass
 

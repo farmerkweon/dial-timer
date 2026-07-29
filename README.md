@@ -34,6 +34,13 @@
 | **테두리 없는 원형 창** — 사각 프레임 없이 다이얼만 | **Frameless round window** — the dial and nothing else |
 | **한/영 도움말** — 시스템 언어로 자동 선택, 버튼으로 전환 | **Bilingual help** — follows your Windows language, switchable by a button |
 
+### 다운로드 / Download
+
+| 경로 | 링크 |
+|---|---|
+| **foxnail.kr 직접 / direct** (GitHub이 막힌 망에서도 동작) | **[DialTimer-1.0.1-Setup.exe](https://foxnail.kr/downloads/DialTimer-1.0.1-Setup.exe)** |
+| GitHub 릴리즈 / release | [최신 릴리즈 / latest](https://github.com/farmerkweon/dial-timer/releases/latest) |
+
 <div align="center">
 <img src="docs/help-ko.png" width="420" alt="도움말 (한국어)">
 <img src="docs/help-en.png" width="420" alt="Help (English)">
@@ -43,8 +50,8 @@
 
 ### 설치 파일 / Installer (권장 / recommended)
 
-1. [최신 릴리즈](https://github.com/farmerkweon/dial-timer/releases/latest)에서 `DialTimer-1.0.0-Setup.exe` 를 내려받습니다
-   <br>*Download `DialTimer-1.0.0-Setup.exe` from the [latest release](https://github.com/farmerkweon/dial-timer/releases/latest)*
+1. [foxnail.kr 직접 다운로드](https://foxnail.kr/downloads/DialTimer-1.0.1-Setup.exe) 또는 [GitHub 릴리즈](https://github.com/farmerkweon/dial-timer/releases/latest)에서 `DialTimer-1.0.1-Setup.exe` 를 내려받습니다
+   <br>*Get `DialTimer-1.0.1-Setup.exe` [straight from foxnail.kr](https://foxnail.kr/downloads/DialTimer-1.0.1-Setup.exe) (works where GitHub is blocked) or from the [GitHub release](https://github.com/farmerkweon/dial-timer/releases/latest)*
 2. 실행하고 안내를 따릅니다. **관리자 권한이 필요 없습니다** — 사용자 폴더에 설치되므로 UAC 창이 뜨지 않습니다
    <br>*Run it and follow the wizard. **No administrator rights needed** — it installs per-user, so there is no UAC prompt*
 3. 설치 중 **"Windows 시작할 때 자동 실행"** 을 켜면 로그인할 때 트레이에 자동으로 뜹니다

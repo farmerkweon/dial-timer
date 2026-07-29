@@ -153,6 +153,7 @@ UI와 로직을 분리했습니다. `TimerCore`는 tkinter를 전혀 모르는 �
 | `test_timer_core.py` | 로직 단위 테스트 30항목 / 30 logic assertions |
 | `test_interaction.py` | 입력 통합 테스트 60항목 / 60 input assertions (opens a real window) |
 | `build/make_icon.py` | 앱 아이콘 생성 / builds the .ico |
+| `build/make_version.py` | exe 버전 리소스 생성 (APP_VERSION에서 읽음) / builds the version resource |
 | `build/make_hero.py` | 투명 배경 시계 이미지 생성 / renders the transparent clock images |
 | `installer/DialTimer.iss` | Inno Setup 스크립트 / installer script |
 
@@ -165,8 +166,10 @@ python test_interaction.py
 
 ```bash
 python build/make_icon.py
+python build/make_version.py
 pyinstaller --noconfirm --clean --windowed --name DialTimer ^
-    --icon build/dial_timer.ico --hidden-import pystray._win32 ^
+    --icon build/dial_timer.ico --version-file build/version_info.txt ^
+    --hidden-import pystray._win32 ^
     --distpath build/dist --workpath build/work --specpath build tray_timer.py
 ISCC installer/DialTimer.iss
 ```

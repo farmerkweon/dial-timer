@@ -34,14 +34,31 @@ import webbrowser
 # ---------------------------------------------------------------------------
 
 APP_NAME = "Dial Timer"
-APP_VERSION = "1.0.2"
+APP_VERSION = "1.0.3"
 APP_URL = "https://foxnail.kr"
 APP_COPYRIGHT = "© 2026 foxnail.kr · All rights reserved"
 
-# 도움말 하단 응원 섹션에서 여는 링크
+# 도움말 하단 응원 섹션에서 여는 링크와 같은 곳을 가리키는 QR 이미지
 URL_LOTTO_SUDOKU = "https://play.google.com/store/apps/details?id=com.foxnail.lotto_sudoku"
 URL_ART_GRID = "https://play.google.com/store/apps/details?id=com.artgrid.app.free"
+QR_LOTTO_SUDOKU = "qr-sudoku.png"
+QR_ART_GRID = "qr-artgrid.png"
+# QR 에셋 한 변의 모듈 수 (테두리1 + 여백4 + QR29 + 여백4 + 테두리1).
+# build/make_qr_assets.py 가 이 값으로 만든다. 표시할 때 이 값의 배수로만
+# 줄이면 한 모듈이 정수 픽셀로 떨어져 어떤 배율에서도 뭉개지지 않는다.
+QR_EDGE_MODULES = 39
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def resource_path(*parts: str) -> str:
+    """
+    번들된 리소스(QR 이미지 등)의 실제 경로.
+
+    PyInstaller onedir 로 얼리면 datas 는 _internal 아래 풀리고 그 경로가
+    sys._MEIPASS 로 들어온다. 소스로 실행할 때는 스크립트 폴더 기준.
+    """
+    base = getattr(sys, "_MEIPASS", BASE_DIR)
+    return os.path.join(base, *parts)
 
 
 def _config_path() -> str:
@@ -520,14 +537,14 @@ class HelpWindow(tk.Toplevel):
             ],
             "support": {
                 "title": "만든 사람 응원하기",
-                "intro": "이 시계가 도움이 되셨다면, 개발자를 위해 아래 앱을 "
-                         "핸드폰에 설치하고 즐겨주세요.",
-                "apps": [("로또 스도쿠", URL_LOTTO_SUDOKU),
-                         ("아트 그리드", URL_ART_GRID)],
+                "intro": "이 도구가 도움이 되셨다면, 개발자를 위해 아래 두 앱을 "
+                         "휴대폰에 설치하고 즐겨 주세요. 큰 힘이 됩니다.",
+                "apps": [("로또 스도쿠", URL_LOTTO_SUDOKU, QR_LOTTO_SUDOKU),
+                         ("아트 그리드", URL_ART_GRID, QR_ART_GRID)],
                 "store": "Google Play",
+                "share": "앱이 만족스러우면 앱의 공유 기능으로 주위 분들께 "
+                         "전해 주시면 참으로 감사하겠습니다.",
                 "note": "여력이 되면 아이폰 사용자를 위해서도 만들어 보겠습니다.",
-                "share": "이 앱들이 마음에 드신다면, 앱의 공유 버튼을 이용해 "
-                         "주위 지인들에게도 전해주세요.",
             },
         },
         "en": {
@@ -565,15 +582,15 @@ class HelpWindow(tk.Toplevel):
             ],
             "support": {
                 "title": "Support the developer",
-                "intro": "If this timer helped you, please install these apps "
-                         "on your phone and enjoy them.",
-                "apps": [("Lotto Sudoku", URL_LOTTO_SUDOKU),
-                         ("Art Grid", URL_ART_GRID)],
+                "intro": "If this tool helped you, please install these two "
+                         "apps on your phone and enjoy them. It means a lot.",
+                "apps": [("Lotto Sudoku", URL_LOTTO_SUDOKU, QR_LOTTO_SUDOKU),
+                         ("Art Grid", URL_ART_GRID, QR_ART_GRID)],
                 "store": "Google Play",
+                "share": "If you enjoy them, I would be truly grateful if you "
+                         "passed them on with the share button in the app.",
                 "note": "If I get the chance, I'd like to build iPhone "
                         "versions too.",
-                "share": "If you like them, please pass them on to people "
-                         "around you with the share button inside the app.",
             },
         },
     }
@@ -587,9 +604,18 @@ class HelpWindow(tk.Toplevel):
     FG_LINK = "#6fa8ff"
     FG_LINK_HOVER = "#a8ccff"
     LINE = "#383838"
+    # 섹션 제목 옆 보조 설명. FG_DIM 은 작은 글씨에서 거의 안 읽힌다.
+    FG_NOTE = "#a5a5a5"
     SUPPORT_BG = "#1f2320"
     STORE_BG = "#2b6a4b"
     STORE_BG_HOVER = "#357f5a"
+    # 응원 배너 본문. 단축키 표의 FG_DIM(#8a8a8a)을 쓰면 읽으라고 쓴 글이
+    # 읽히지 않는다. 배너 안에서만 한 단계 밝게 쓴다.
+    SUPPORT_FG = "#c3c8c3"
+    # QR 한 변의 표시 크기 (DPI 배율 적용 전).
+    # 크게 잡으면 도움말의 주인공인 단축키 표를 눌러버린다. 눈에는 띄되
+    # 주인공은 아닌 크기. 실제 렌더 크기는 모듈 배수로 스냅된다(_qr_photo).
+    QR_PX = 120
 
     def __init__(self, app: "TrayTimerUI"):
         super().__init__(app.root)
@@ -631,6 +657,7 @@ class HelpWindow(tk.Toplevel):
 
     def _build(self) -> None:
         p, t = self._px, self._t
+        self._qr_images: list = []     # 다시 그릴 때마다 새로 담는다
         self.title(f"{APP_NAME} — {t['window']}")
 
         root = tk.Frame(self, bg=self.BG,
@@ -642,14 +669,14 @@ class HelpWindow(tk.Toplevel):
         tk.Button(head, text=t["toggle"], command=self._toggle_lang,
                   bg=self.CARD, fg=self.FG_VAL, activebackground="#333333",
                   activeforeground="#ffffff", relief="flat", bd=0,
-                  font=self._font(10, True), cursor="hand2",
-                  padx=int(p(12)), pady=int(p(3))).pack(side="right", anchor="n")
+                  font=self._font(11, True), cursor="hand2",
+                  padx=int(p(13)), pady=int(p(4))).pack(side="right", anchor="n")
         titles = tk.Frame(head, bg=self.BG)
         titles.pack(side="left", anchor="w")
         tk.Label(titles, text=t["title"], bg=self.BG, fg=self.FG_TITLE,
-                 font=self._font(16, True), anchor="w").pack(fill="x")
-        tk.Label(titles, text=t["subtitle"], bg=self.BG, fg=self.FG_DIM,
-                 font=self._font(10), anchor="w").pack(fill="x",
+                 font=self._font(18, True), anchor="w").pack(fill="x")
+        tk.Label(titles, text=t["subtitle"], bg=self.BG, fg=self.FG_NOTE,
+                 font=self._font(11), anchor="w").pack(fill="x",
                                                        pady=(int(p(2)), 0))
 
         # 세로로 쌓으면 화면 아래로 넘쳐서 2단으로 배치한다.
@@ -663,11 +690,25 @@ class HelpWindow(tk.Toplevel):
                 padx=(0, int(p(12))) if i % 2 == 0 else (0, 0),
                 pady=(0, int(p(10))))
 
-        self._support(root)
+        # 창 폭은 위 단축키 표가 정한다. 배너 글에 줄바꿈 폭을 미리 주지 않으면
+        # 긴 문장이 한 줄로 뻗어 창을 제 마음대로 넓혀버리므로, 표가 잡은 폭을
+        # 재서 넘겨준다.
+        body.update_idletasks()
+        self._support(root, body.winfo_reqwidth())
         self._footer(root)
 
-    def _support(self, parent) -> None:
-        """도움말 맨 아래 응원 배너 (좌우 단 전체 폭)."""
+    def _qr_display_px(self) -> int:
+        """실제로 그려질 QR 한 변의 픽셀 (모듈 배수로 스냅된 값)."""
+        want = self._px(self.QR_PX)
+        return max(2, round(want / QR_EDGE_MODULES)) * QR_EDGE_MODULES
+
+    def _support(self, parent, content_w: int) -> None:
+        """
+        도움말 맨 아래 응원 배너 (좌우 단 전체 폭).
+
+        QR은 정사각이라 가운데 띄워두면 주변에 어중간한 빈자리가 남는다.
+        글은 가운데에 흘리고 QR 두 장은 양 끝에 붙인다.
+        """
         p, t = self._px, self._t["support"]
         card = tk.Frame(parent, bg=self.SUPPORT_BG,
                         padx=int(p(14)), pady=int(p(11)))
@@ -676,38 +717,104 @@ class HelpWindow(tk.Toplevel):
         head = tk.Frame(card, bg=self.SUPPORT_BG)
         head.pack(fill="x")
         tk.Label(head, text="♥", bg=self.SUPPORT_BG, fg=self.FG_KEY,
-                 font=self._font(12, True)).pack(side="left",
+                 font=self._font(13, True)).pack(side="left",
                                                  padx=(0, int(p(6))))
         tk.Label(head, text=t["title"], bg=self.SUPPORT_BG,
-                 fg=self.FG_TITLE, font=self._font(11, True)).pack(side="left")
+                 fg=self.FG_TITLE, font=self._font(13, True)).pack(side="left")
 
-        tk.Label(card, text=t["intro"], bg=self.SUPPORT_BG, fg=self.FG_VAL,
-                 font=self._font(10), anchor="w",
-                 justify="left").pack(fill="x", pady=(int(p(6)), int(p(8))))
+        body = tk.Frame(card, bg=self.SUPPORT_BG)
+        body.pack(fill="x", pady=(int(p(8)), 0))
 
-        apps = tk.Frame(card, bg=self.SUPPORT_BG)
-        apps.pack(fill="x")
-        for name, url in t["apps"]:
-            self._store_button(apps, name, t["store"], url)
+        # QR 두 장을 양 끝으로 벌린다.
+        # 나란히 붙여두면 폰을 가까이 댔을 때 화면에 두 개가 같이 잡혀
+        # 카메라가 어느 쪽을 읽어야 할지 헷갈린다. QR 한 변보다 훨씬 넓게
+        # 떨어뜨려, 하나를 화면에 채우면 다른 하나는 프레임 밖으로 나가게 한다.
+        sides = ("left", "right")
+        for (name, url, qr), side in zip(t["apps"], sides):
+            self._app_entry(body, name, t["store"], url, qr).pack(
+                side=side, anchor="n")
 
-        tk.Label(card, text=t["note"], bg=self.SUPPORT_BG, fg=self.FG_DIM,
-                 font=self._font(10), anchor="w",
-                 justify="left").pack(fill="x", pady=(int(p(9)), 0))
-        tk.Label(card, text=t["share"], bg=self.SUPPORT_BG, fg=self.FG_DIM,
-                 font=self._font(10), anchor="w",
-                 justify="left").pack(fill="x", pady=(int(p(2)), 0))
+        texts = tk.Frame(body, bg=self.SUPPORT_BG)
+        texts.pack(side="left", fill="both", expand=True,
+                   padx=int(p(18)))
+        lines = tk.Frame(texts, bg=self.SUPPORT_BG)
+        lines.pack(fill="x", anchor="n")         # QR 윗변과 글 첫 줄을 맞춘다
+
+        # 글이 쓸 수 있는 폭 = 표가 정한 폭에서 카드 여백·QR 두 장·좌우 간격을 뺀 나머지.
+        text_w = max(int(p(150)),
+                     content_w - 2 * int(p(14))          # 카드 안쪽 여백
+                     - 2 * self._qr_display_px()          # QR 두 장
+                     - 2 * int(p(18)))                    # 글과 QR 사이 간격
+
+        labels = []
+        for key, fg, size, gap in (("intro", self.FG_VAL, 12, 0),
+                                   ("share", self.SUPPORT_FG, 11, int(p(10))),
+                                   ("note", self.SUPPORT_FG, 11, int(p(5)))):
+            lb = tk.Label(lines, text=t[key], bg=self.SUPPORT_BG, fg=fg,
+                          font=self._font(size), anchor="w", justify="left",
+                          wraplength=text_w)
+            lb.pack(fill="x", pady=(gap, 0))
+            labels.append(lb)
+
+        # 언어·DPI마다 실제 배정 폭이 조금씩 달라서 배치 뒤 한 번 더 맞춘다.
+        def wrap(event):
+            width = max(int(p(150)), event.width)
+            for lb in labels:
+                lb.configure(wraplength=width)
+
+        lines.bind("<Configure>", wrap)
+
+    def _app_entry(self, parent, name: str, store: str, url: str,
+                   qr_file: str) -> tk.Frame:
+        """QR 한 장 + 그 아래 같은 폭의 스토어 버튼. 둘 다 같은 링크를 연다."""
+        p = self._px
+        col = tk.Frame(parent, bg=self.SUPPORT_BG)
+
+        photo = self._qr_photo(qr_file, int(p(self.QR_PX)))
+        if photo is not None:
+            qr = tk.Label(col, image=photo, bg=self.SUPPORT_BG,
+                          cursor="hand2", bd=0)
+            qr.pack(pady=(0, int(p(6))))
+            qr.bind("<Button-1>", lambda _e: self._open_url(url))
+
+        # fill="x" 라서 버튼 폭이 QR 폭에 맞춰진다 — 위아래 모서리가 딱 떨어진다.
+        self._store_button(col, name, store, url)
+        return col
+
+    def _qr_photo(self, filename: str, size: int):
+        """
+        QR 이미지를 표시 크기로 줄여 PhotoImage 로 만든다.
+
+        요청 크기를 그대로 쓰지 않고 모듈 수의 배수로 스냅한다. 한 모듈이
+        정수 픽셀이 되면 NEAREST 로 정확히 떨어져 흐려지지 않는다.
+        (스냅 없이 부드럽게 줄이면 크기에 따라 스캔이 되었다 안 되었다 한다.)
+
+        tk 는 이미지 참조를 붙들지 않으므로 self 에 남겨야 한다.
+        리소스가 없거나 PIL 이 없으면 None — QR 없이 버튼만 그린다.
+        """
+        per_module = max(2, round(size / QR_EDGE_MODULES))
+        edge = per_module * QR_EDGE_MODULES
+        try:
+            from PIL import Image, ImageTk
+            with Image.open(resource_path("assets", filename)) as im:
+                im = im.convert("RGB").resize((edge, edge), Image.NEAREST)
+                photo = ImageTk.PhotoImage(im)
+        except Exception:
+            return None
+        self._qr_images.append(photo)      # GC 방지
+        return photo
 
     def _store_button(self, parent, name: str, store: str, url: str) -> None:
         p = self._px
         btn = tk.Frame(parent, bg=self.STORE_BG, cursor="hand2",
                        padx=int(p(14)), pady=int(p(7)))
-        btn.pack(side="left", padx=(0, int(p(10))))
+        btn.pack(fill="x")
         top = tk.Label(btn, text=name, bg=self.STORE_BG, fg="#ffffff",
-                       font=self._font(11, True), cursor="hand2")
-        top.pack(anchor="w")
+                       font=self._font(12, True), cursor="hand2")
+        top.pack()
         sub = tk.Label(btn, text=f"▶  {store}", bg=self.STORE_BG,
-                       fg="#9fd0b0", font=self._font(9), cursor="hand2")
-        sub.pack(anchor="w")
+                       fg="#b5e0c4", font=self._font(10), cursor="hand2")
+        sub.pack()
 
         def open_it(_e=None):
             self._open_url(url)
@@ -735,18 +842,18 @@ class HelpWindow(tk.Toplevel):
         tk.Button(bar, text=self._t["close"], command=self._app._close_help,
                   bg=self.CARD, fg=self.FG_VAL, activebackground="#333333",
                   activeforeground="#ffffff", relief="flat", bd=0,
-                  font=self._font(11, True), cursor="hand2",
-                  padx=int(p(18)), pady=int(p(5))).pack(side="right")
+                  font=self._font(12, True), cursor="hand2",
+                  padx=int(p(18)), pady=int(p(6))).pack(side="right")
 
         link = tk.Label(bar, text=APP_URL, bg=self.BG, fg=self.FG_LINK,
-                        font=self._font(11, True), cursor="hand2")
+                        font=self._font(12, True), cursor="hand2")
         link.pack(side="left", anchor="w")
         link.bind("<Button-1>", self._open_site)
         link.bind("<Enter>", lambda _e: link.configure(fg=self.FG_LINK_HOVER))
         link.bind("<Leave>", lambda _e: link.configure(fg=self.FG_LINK))
 
         tk.Label(parent, text=f"{APP_COPYRIGHT} · {self._t['hint']}",
-                 bg=self.BG, fg=self.FG_DIM, font=self._font(9),
+                 bg=self.BG, fg=self.FG_DIM, font=self._font(10),
                  anchor="w").pack(fill="x", pady=(int(p(8)), 0))
 
     def _open_site(self, _event=None) -> None:
@@ -769,23 +876,24 @@ class HelpWindow(tk.Toplevel):
         tk.Frame(head, bg=self.FG_KEY, width=int(p(3)),
                  height=int(p(12))).pack(side="left", padx=(0, int(p(7))))
         tk.Label(head, text=title, bg=self.BG, fg=self.FG_TITLE,
-                 font=self._font(11, True)).pack(side="left")
+                 font=self._font(13, True)).pack(side="left")
         if note:
-            tk.Label(head, text=note, bg=self.BG, fg=self.FG_DIM,
-                     font=self._font(9)).pack(side="left", padx=(int(p(7)), 0))
+            tk.Label(head, text=note, bg=self.BG, fg=self.FG_NOTE,
+                     font=self._font(10)).pack(side="left", padx=(int(p(7)), 0))
 
         card = tk.Frame(box, bg=self.CARD,
-                        padx=int(p(11)), pady=int(p(7)))
+                        padx=int(p(11)), pady=int(p(8)))
         card.pack(fill="both", expand=True)
-        card.columnconfigure(0, minsize=int(p(104)))
+        # 글자가 커진 만큼 키 열도 넓혀야 "Ctrl + 우클릭" 이 줄바꿈되지 않는다.
+        card.columnconfigure(0, minsize=int(p(118)))
         for i, (key, val) in enumerate(rows):
             tk.Label(card, text=key, bg=self.CARD, fg=self.FG_KEY,
-                     font=self._font(11, True), anchor="e").grid(
-                row=i, column=0, sticky="e", pady=int(p(1)))
+                     font=self._font(12, True), anchor="e").grid(
+                row=i, column=0, sticky="e", pady=int(p(2)))
             tk.Label(card, text=val, bg=self.CARD, fg=self.FG_VAL,
-                     font=self._font(11), anchor="w").grid(
+                     font=self._font(12), anchor="w").grid(
                 row=i, column=1, sticky="w", padx=(int(p(12)), 0),
-                pady=int(p(1)))
+                pady=int(p(2)))
         return box
 
     def _place_beside(self, app: "TrayTimerUI") -> None:

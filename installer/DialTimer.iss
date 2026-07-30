@@ -8,7 +8,7 @@
 ; 설정 저장·자동 시작 등록이 모두 권한 문제 없이 동작한다.
 
 #define AppName        "Dial Timer"
-#define AppVersion     "1.0.2"
+#define AppVersion     "1.0.3"
 #define AppPublisher   "foxnail.kr"
 #define AppURL         "https://foxnail.kr"
 #define AppExeName     "DialTimer.exe"

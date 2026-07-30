@@ -38,7 +38,7 @@
 
 | 경로 | 링크 |
 |---|---|
-| **foxnail.kr 직접 / direct** (GitHub이 막힌 망에서도 동작) | **[DialTimer-1.0.2-Setup.exe](https://foxnail.kr/downloads/DialTimer-1.0.2-Setup.exe)** |
+| **foxnail.kr 직접 / direct** (GitHub이 막힌 망에서도 동작) | **[DialTimer-1.0.3-Setup.exe](https://foxnail.kr/downloads/DialTimer-1.0.3-Setup.exe)** |
 | GitHub 릴리즈 / release | [최신 릴리즈 / latest](https://github.com/farmerkweon/dial-timer/releases/latest) |
 
 <div align="center">
@@ -50,8 +50,8 @@
 
 ### 설치 파일 / Installer (권장 / recommended)
 
-1. [foxnail.kr 직접 다운로드](https://foxnail.kr/downloads/DialTimer-1.0.2-Setup.exe) 또는 [GitHub 릴리즈](https://github.com/farmerkweon/dial-timer/releases/latest)에서 `DialTimer-1.0.2-Setup.exe` 를 내려받습니다
-   <br>*Get `DialTimer-1.0.2-Setup.exe` [straight from foxnail.kr](https://foxnail.kr/downloads/DialTimer-1.0.2-Setup.exe) (works where GitHub is blocked) or from the [GitHub release](https://github.com/farmerkweon/dial-timer/releases/latest)*
+1. [foxnail.kr 직접 다운로드](https://foxnail.kr/downloads/DialTimer-1.0.3-Setup.exe) 또는 [GitHub 릴리즈](https://github.com/farmerkweon/dial-timer/releases/latest)에서 `DialTimer-1.0.3-Setup.exe` 를 내려받습니다
+   <br>*Get `DialTimer-1.0.3-Setup.exe` [straight from foxnail.kr](https://foxnail.kr/downloads/DialTimer-1.0.3-Setup.exe) (works where GitHub is blocked) or from the [GitHub release](https://github.com/farmerkweon/dial-timer/releases/latest)*
 2. 실행하고 안내를 따릅니다. **관리자 권한이 필요 없습니다** — 사용자 폴더에 설치되므로 UAC 창이 뜨지 않습니다
    <br>*Run it and follow the wizard. **No administrator rights needed** — it installs per-user, so there is no UAC prompt*
 3. 설치 중 **"Windows 시작할 때 자동 실행"** 을 켜면 로그인할 때 트레이에 자동으로 뜹니다
@@ -154,6 +154,7 @@ UI와 로직을 분리했습니다. `TimerCore`는 tkinter를 전혀 모르는 �
 | `test_interaction.py` | 입력 통합 테스트 60항목 / 60 input assertions (opens a real window) |
 | `build/make_icon.py` | 앱 아이콘 생성 / builds the .ico |
 | `build/make_version.py` | exe 버전 리소스 생성 (APP_VERSION에서 읽음) / builds the version resource |
+| `build/make_qr_assets.py` | 도움말 QR 이미지 생성 (모듈 단위로 복원) / rebuilds the help QR images |
 | `build/make_hero.py` | 투명 배경 시계 이미지 생성 / renders the transparent clock images |
 | `installer/DialTimer.iss` | Inno Setup 스크립트 / installer script |
 
@@ -167,9 +168,11 @@ python test_interaction.py
 ```bash
 python build/make_icon.py
 python build/make_version.py
+python build/make_qr_assets.py
 pyinstaller --noconfirm --clean --windowed --name DialTimer ^
     --icon build/dial_timer.ico --version-file build/version_info.txt ^
-    --hidden-import pystray._win32 ^
+    --hidden-import pystray._win32 --hidden-import PIL.ImageTk ^
+    --add-data "assets;assets" ^
     --distpath build/dist --workpath build/work --specpath build tray_timer.py
 ISCC installer/DialTimer.iss
 ```

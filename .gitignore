@@ -26,3 +26,6 @@ timer_config.json
 # OS
 Thumbs.db
 desktop.ini
+
+# 에이전트 작업 로그 (패널 자문 등) — 산출물이지 소스가 아니다
+logs/

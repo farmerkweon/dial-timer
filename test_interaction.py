@@ -203,12 +203,15 @@ for lg in T.HELP_LANGS:
     sup = T.HelpWindow.TEXT[lg].get("support")
     check(f"[{lg}] support 존재", isinstance(sup, dict))
     check(f"[{lg}] 앱 2개", len(sup["apps"]) == 2, [a[0] for a in sup["apps"]])
-    urls = [u for _n, u in sup["apps"]]
+    urls = [a[1] for a in sup["apps"]]
     check(f"[{lg}] 로또 스도쿠 링크", T.URL_LOTTO_SUDOKU in urls)
     check(f"[{lg}] 아트 그리드 링크", T.URL_ART_GRID in urls)
     check(f"[{lg}] 아이폰 언급", bool(sup["note"].strip()))
     check(f"[{lg}] 공유 안내", bool(sup["share"].strip()))
     check(f"[{lg}] 링크가 https", all(u.startswith("https://") for u in urls))
+    qrs = [a[2] for a in sup["apps"]]
+    check(f"[{lg}] QR 이미지 파일 존재",
+          all(os.path.exists(T.resource_path("assets", q)) for q in qrs), qrs)
 
 
 def _labels(widget, out):
@@ -225,7 +228,7 @@ texts = _labels(hw, [])
 sup_ko = T.HelpWindow.TEXT[hw._lang]["support"]
 check("응원 문구가 화면에 실제로 그려짐", sup_ko["intro"] in texts)
 check("앱 버튼이 화면에 그려짐",
-      all(n in texts for n, _u in sup_ko["apps"]), )
+      all(a[0] in texts for a in sup_ko["apps"]), )
 check("공유 안내가 화면에 그려짐", sup_ko["share"] in texts)
 
 app._on_key(Ev(char="h", keysym="h"))
